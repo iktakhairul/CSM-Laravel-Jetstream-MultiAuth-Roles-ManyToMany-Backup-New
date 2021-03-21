@@ -2,7 +2,11 @@
 
 namespace App\Providers;
 
+use App\Billing\BankPaymentGateway;
+use App\Billing\CreditPaymentGateway;
+use App\Billing\PaymentGatewayInterface;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,7 +17,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->singleton(PaymentGatewayInterface::class, function ($app) {
+            if (request()->has('credit')) {
+                return new CreditPaymentGateway('BDT');
+            }else {
+                return new BankPaymentGateway('BDT');
+            }
+        });
     }
 
     /**
@@ -23,6 +33,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        JsonResource::withoutWrapping();
     }
 }
